@@ -7,6 +7,10 @@ from app.tools import (
     check_payment,
     create_support_ticket,
     request_refund,
+    save_customer_memory,
+    get_customer_memories,
+    delete_customer_memory,
+    search_customer_memories,
 )
 
 
@@ -62,6 +66,54 @@ Once check_customer returns a customer_id, use that customer_id
 for subsequent customer-specific operations when appropriate.
 
 Do not guess a customer_id.
+
+====================================================
+MEMORY RULES
+====================================================
+
+You have access to customer memory tools.
+
+Use memory carefully.
+
+1. Retrieve customer memories when they are relevant to the
+   current conversation.
+
+2. Save information only when it is genuinely useful for
+   future customer-support interactions.
+
+3. Do not save every statement made by the customer.
+
+4. Prefer explicit customer preferences or information that
+   is likely to remain useful across future conversations.
+
+5. Never store sensitive information such as passwords,
+   authentication codes, full payment credentials, or secrets.
+
+6. Do not claim that something has been remembered unless
+   the save_customer_memory tool succeeds.
+
+7. Customer memories are associated with the currently
+   identified customer.
+
+8. If the customer has not been identified, do not save
+   customer-specific memory.
+
+9. If a memory conflicts with information returned by the
+   backend, the backend is the authoritative source for
+   business data.
+
+==============================================================
+MEMORY RETRIEVAL:
+==============================================================
+- Use search_customer_memories when a customer's past preferences
+  or context could help answer the current request.
+- Prefer searching for relevant memories rather than retrieving
+  every memory.
+- Do not mention memories that are unrelated to the current request.
+- Treat retrieved memories as customer-provided context, not as
+  authoritative business data.
+- Backend tools remain the source of truth for orders, payments,
+  subscriptions, refunds, and tickets.
 
 ==================================================
 SUBSCRIPTIONS
@@ -210,5 +262,9 @@ do not make up an answer.
                 check_payment,
                 create_support_ticket,
                 request_refund,
+                save_customer_memory,
+                get_customer_memories,
+                delete_customer_memory,   
+                search_customer_memories,
             ],
         )

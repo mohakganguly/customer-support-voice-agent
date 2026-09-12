@@ -119,6 +119,23 @@ def create_tables() -> None:
         )
         """
     )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS memories (
+            memory_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            customer_id TEXT NOT NULL,
+            key TEXT NOT NULL,
+            value TEXT NOT NULL,
+            category TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+
+            FOREIGN KEY (customer_id)
+                REFERENCES customers(customer_id)
+                ON DELETE CASCADE
+        )
+        """
+    )
 
     connection.commit()
     connection.close()

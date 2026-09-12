@@ -11,7 +11,12 @@ from backend.repository import (
     create_ticket,
     create_refund,
 )
-
+from backend.memory_repository import (
+    save_memory,
+    get_memories,
+    delete_memory,
+    search_memories,
+)
 
 # ORDER ID NORMALIZATION
 
@@ -141,6 +146,9 @@ async def check_customer(
                 "for this email."
             ),
         }
+    context.userdata.customer_id = customer["customer_id"]
+    context.userdata.customer_email = customer["email"]
+    context.userdata.customer_name = customer["name"]
 
     return {
         "success": True,
@@ -324,3 +332,126 @@ async def request_refund(
             "error": "refund_system_error",
             "message": str(e),
         }
+
+
+ #SAVE MEMORY TOOL
+
+@function_tool
+async def save_customer_memory(
+    context: RunContext,
+    key: str,
+    value: str,
+    category: str,
+) -> dict:
+    """
+    Save a useful piece of information about the current customer.
+
+    Use this only when the information is genuinely useful for
+    future customer-support conversations.
+    """
+
+    customer_id = context.userdata.customer_id
+
+    if not customer_id:
+        return {
+            "success": False,
+            "error": "customer_not_identified",
+        }
+
+    memory = save_memory(
+        customer_id=customer_id,
+        key=key,
+        value=value,
+        category=category,
+    )
+
+    return {
+        "success": True,
+        "memory": memory,
+    }
+
+# RETRIEVE MEMORY TOOL
+
+@function_tool
+async def get_customer_memories(
+    context: RunContext,
+) -> dict:
+    """
+    Retrieve memories associated with the current customer.
+    """
+
+    customer_id = context.userdata.customer_id
+
+    if not customer_id:
+        return {
+            "success": False,
+            "error": "customer_not_identified",
+        }
+
+    memories = get_memories(customer_id)
+
+    return {
+        "success": True,
+        "customer_id": customer_id,
+        "memories": memories,
+    }
+
+#DELETE MEMORY TOOL
+
+@function_tool
+async def delete_customer_memory(
+    context: RunContext,
+    key: str,
+) -> dict:
+    """
+    Delete a specific memory belonging to the current customer.
+    """
+
+    customer_id = context.userdata.customer_id
+
+    if not customer_id:
+        return {
+            "success": False,
+            "error": "customer_not_identified",
+        }
+
+    deleted = delete_memory(
+        customer_id=customer_id,
+        key=key,
+    )
+
+    return {
+        "success": deleted,
+        "key": key,
+    }
+
+# SEARCH CUSTOMER MEMORIES
+
+@function_tool
+async def search_customer_memories(
+    context: RunContext,
+    query: str,
+) -> dict:
+    """
+    Search the current customer's memories for information
+    relevant to the current conversation.
+    """
+
+    customer_id = context.userdata.customer_id
+
+    if not customer_id:
+        return {
+            "success": False,
+            "error": "customer_not_identified",
+        }
+
+    memories = search_memories(
+        customer_id=customer_id,
+        query=query,
+    )
+
+    return {
+        "success": True,
+        "customer_id": customer_id,
+        "memories": memories,
+    }
