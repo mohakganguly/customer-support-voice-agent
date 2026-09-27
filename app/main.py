@@ -1,9 +1,10 @@
 from dotenv import load_dotenv
-
+import asyncio
 from livekit.agents import (
     AgentServer,
     AgentSession,
     JobContext,
+    TurnHandlingOptions,
     cli,
     inference
 )
@@ -81,20 +82,27 @@ async def entrypoint(ctx: JobContext):
             language="en",
         ),
         userdata=SupportSessionState(),
+
+        turn_handling=TurnHandlingOptions(
+            turn_detection="stt",
+
+            interruption={
+                "enabled": True,
+                "min_duration": 0.3,
+                "min_words": 0,
+            },
+        ),
     )
     @session.on("close")
-    async def on_session_close(event):
+    def on_session_close(event):
         print("🔴 Session closed")
-        await extract_and_save_memories(session)
+        asyncio.create_task(extract_and_save_memories(session))
 
     await session.start(
         room=ctx.room,
         agent=CustomerSupportAgent(),
     )
-    try:
-        await session.shutdown()
-    finally:
-        await extract_and_save_memories(session)
+    
 
 
     print("🤖 Customer Support Agent session started")
